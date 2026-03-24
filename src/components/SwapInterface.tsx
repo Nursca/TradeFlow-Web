@@ -9,6 +9,7 @@ import { useSlippage } from "../contexts/SlippageContext";
 import Card from "./Card";
 import Button from "./ui/Button";
 import Tooltip from "./ui/Tooltip";
+import TradeReviewModal from "./TradeReviewModal";
 
 export default function SwapInterface() {
   const [fromToken, setFromToken] = useState("XLM");
@@ -18,6 +19,7 @@ export default function SwapInterface() {
   const [fromAmount, setFromAmount] = useState("");
   const [toAmount, setToAmount] = useState("");
   const [priceImpact, setPriceImpact] = useState(0);
+  const [isTradeReviewOpen, setIsTradeReviewOpen] = useState(false);
   const { slippageTolerance } = useSlippage();
 
   // Load saved token selections on mount
@@ -80,13 +82,20 @@ export default function SwapInterface() {
     if (priceImpact > 5) {
       setIsHighSlippageWarningOpen(true);
     } else {
-      // Proceed with normal swap
-      console.log("Proceeding with normal swap");
+      setIsTradeReviewOpen(true);
     }
   };
 
   const handleHighSlippageConfirm = () => {
-    console.log("Proceeding with high slippage swap");
+    setIsHighSlippageWarningOpen(false);
+    setIsTradeReviewOpen(true);
+  };
+
+  const handleTradeConfirm = () => {
+    setIsTradeReviewOpen(false);
+    // Proceed with actual wallet signature
+    console.log("Signing transaction in wallet...");
+    // TODO: Add real Soroban transaction logic here
   };
 
   return (
@@ -205,6 +214,21 @@ export default function SwapInterface() {
         onClose={() => setIsHighSlippageWarningOpen(false)}
         onConfirm={handleHighSlippageConfirm}
         priceImpact={priceImpact}
+      />
+
+      {/* Trade Review Modal */}
+      <TradeReviewModal
+        isOpen={isTradeReviewOpen}
+        onClose={() => setIsTradeReviewOpen(false)}
+        onConfirm={handleTradeConfirm}
+        fromAmount={fromAmount}
+        fromToken={fromToken}
+        toAmount={toAmount}
+        toToken={toToken}
+        priceImpact={priceImpact}
+        slippageTolerance={slippageTolerance}
+        fee="0.3%"
+        route={`${fromToken} → ${toToken}`}
       />
     </>
   );
