@@ -42,6 +42,10 @@ export default function Footer() {
               <ExternalLink size={12} className="w-4 h-4" />
             </a>
           </nav>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></div>
+            <span className="text-slate-400 text-sm">Systems Operational</span>
+          </div>
         </div>
       </div>
     </footer>
