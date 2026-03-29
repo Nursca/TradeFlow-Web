@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { ChevronDown, Search, X, Copy } from "lucide-react";
 import { useDebounce } from "../hooks/useDebounce";
@@ -25,11 +27,13 @@ export default function TokenDropdown({ onTokenChange }: TokenDropdownProps) {
   // Hardcoded array of tokens
   const tokens = ["XLM", "USDC", "yXLM"];
 
-  // Mock addresses so the copy function has something to grab
+  /** * ISSUE #86: Mock addresses for copy functionality. 
+   * In a production environment, these would come from a token list API.
+   */
   const mockAddresses: Record<string, string> = {
     "XLM": "native",
-    "USDC": "CBQ6O7Y4O7Z5J2...", // Dummy Stellar contract address
-    "yXLM": "CBP3T2...",
+    "USDC": "CBQ6O7Y4O7Z5J2... (Stellar Contract)",
+    "yXLM": "CBP3T2... (Yield Stellar Asset)",
   };
 
   // Memoize filtered tokens based on debounced search value
@@ -69,17 +73,19 @@ export default function TokenDropdown({ onTokenChange }: TokenDropdownProps) {
     }
   };
 
-  /* * ISSUE #86: Handler to copy token address to clipboard without closing the dropdown */
+  /**
+   * ISSUE #86: Clipboard handler.
+   * Uses stopPropagation to ensure the dropdown doesn't close when copying.
+   */
   const handleCopyAddress = (e: React.MouseEvent, token: string) => {
-    e.stopPropagation(); // Prevents the parent button's onClick (handleTokenSelect) from firing
-    const address = mockAddresses[token] || "Unknown Address";
-
+    e.stopPropagation();
+    const address = mockAddresses[token] || "Address not found";
+    
     navigator.clipboard.writeText(address)
       .then(() => {
         toast.success("Token Address Copied!");
       })
-      .catch((err) => {
-        console.error("Failed to copy text: ", err);
+      .catch(() => {
         toast.error("Failed to copy address");
       });
   };
@@ -119,7 +125,7 @@ export default function TokenDropdown({ onTokenChange }: TokenDropdownProps) {
               {searchInput && (
                 <button
                   onClick={() => setSearchInput("")}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
                   aria-label="Clear search"
                 >
                   <X size={16} />
@@ -141,14 +147,14 @@ export default function TokenDropdown({ onTokenChange }: TokenDropdownProps) {
                     <button
                       key={`recent-${token}`}
                       onClick={() => handleTokenSelect(token)}
-                      className="w-full text-left px-4 py-2 transition-colors flex items-center justify-between hover:bg-slate-700 text-white"
+                      className="w-full text-left px-4 py-2 transition-colors flex items-center justify-between hover:bg-slate-700 text-white group"
                     >
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{token}</span>
-                        {/* Copy Button */}
+                        {/* ISSUE #86: Copy Icon for Recent Tokens */}
                         <div
                           onClick={(e) => handleCopyAddress(e, token)}
-                          className="text-slate-500 hover:text-white transition-colors cursor-pointer p-1"
+                          className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-blue-400 transition-all p-1"
                           title="Copy Contract Address"
                         >
                           <Copy size={14} />
@@ -173,7 +179,7 @@ export default function TokenDropdown({ onTokenChange }: TokenDropdownProps) {
                 <button
                   key={token}
                   onClick={() => handleTokenSelect(token)}
-                  className={`w-full text-left px-4 py-2 transition-colors flex items-center justify-between ${
+                  className={`w-full text-left px-4 py-2 transition-colors flex items-center justify-between group ${
                     token === selectedToken
                       ? "bg-blue-600/20 text-blue-400"
                       : "hover:bg-slate-700 text-white"
@@ -181,10 +187,10 @@ export default function TokenDropdown({ onTokenChange }: TokenDropdownProps) {
                 >
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{token}</span>
-                    {/* Copy Button */}
+                    {/* ISSUE #86: Copy Icon for All Tokens */}
                     <div
                       onClick={(e) => handleCopyAddress(e, token)}
-                      className="text-slate-500 hover:text-white transition-colors cursor-pointer p-1"
+                      className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-blue-400 transition-all p-1"
                       title="Copy Contract Address"
                     >
                       <Copy size={14} />
@@ -202,8 +208,18 @@ export default function TokenDropdown({ onTokenChange }: TokenDropdownProps) {
               ))}
             </div>
           ) : (
-            <div className="px-4 py-6 text-center text-slate-400">
-              <p>No tokens found</p>
+            /**
+             * ISSUE #91: Enhanced "Token Not Found" Empty State.
+             * Includes visual cues and instructional secondary text.
+             */
+            <div className="px-6 py-10 text-center flex flex-col items-center justify-center">
+              <div className="bg-slate-700/50 p-3 rounded-full mb-4">
+                <Search size={24} className="text-slate-500" />
+              </div>
+              <p className="text-white font-medium mb-1">No tokens found</p>
+              <p className="text-xs text-slate-400 leading-relaxed max-w-[180px]">
+                Try searching for a different name or pasting a valid Stellar contract address.
+              </p>
             </div>
           )}
         </div>
