@@ -98,8 +98,8 @@ export default function TokenDropdown({ onTokenChange }: TokenDropdownProps) {
         className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 transition-colors min-w-[120px] justify-between"
       >
         <span className="font-medium text-white">{selectedToken}</span>
-        <ChevronDown 
-          size={16} 
+        <ChevronDown
+          size={16}
           className={`text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
